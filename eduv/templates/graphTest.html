@@ -1,0 +1,99 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<style media="screen">
+	.Banner4 {
+		background-color:#F44336;
+		height: 50px;
+
+	}
+</style>
+<script>
+$("#focuser").hide();
+var url = 'https://eduvh.herokuapp.com/gets';
+window.onload = function () {
+
+var dps = []; // dataPoints
+var chart = new CanvasJS.Chart("chartContainer", {
+	//Create canvasjs chart
+	title :{
+		text: "Brain Data"
+	},
+	data: [{
+		type: "line",
+		dataPoints: dps
+	}]
+	//Set constant values
+});
+
+var xVal = 0;
+var yVal = 0;
+var updateInterval = 80;
+var dataLength = 30;
+var updateChart = function (count) {
+	//Update method
+	count = count || 1;
+	//Define count variable
+	for (var j = 0; j < count; j++) {
+    $.get(url, function(responseText) {
+			//Send jQuery request to get brain amplitude
+        console.log(responseText);
+        yVal = parseFloat(responseText);
+				//Parse to floating point
+				if(yVal > 1.2) {
+					//If amplitude is greater than 1.2
+					$("#focuser").show();
+					//Show warning banner
+				} else {
+					//If not
+					$("#focuser").hide();
+					//Hide warning banner
+				}
+    });
+		dps.push({
+			x: xVal,
+			y: yVal
+			//Push new x and y values to line
+		});
+		xVal++;
+	}
+
+	if (dps.length > dataLength) {
+		//If scale of graph shown exceeds set maximum
+		dps.shift();
+		//Shift frame of reference
+	}
+
+	chart.render();
+	//Render chart
+};
+
+updateChart(dataLength);
+setInterval(function(){updateChart()}, updateInterval);
+//Set 80 millisecond interval to update chart
+
+}
+</script>
+</head>
+<body>
+<center>
+  <h1>       </h1>
+  <h1>EduVH</h1>
+  <h3>See the engagement of your students to enhance their learning experience</h3>
+  <h4>       </h4>
+  <h4>       </h4>
+  <div id="chartContainer" style="height: 400px; width:60%;"></div>
+	<h1>       </h1>
+	<h1>       </h1>
+	<div id="focuser">
+    <div class="Banner4" width="40%">
+      <center>
+        <font face="Courier New" size="5" color="white">WARNING: YOUR STUDENTS ARE LOSING FOCUS</font>
+      </center>
+    </div>
+  <div>
+</center>
+<script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+</body>
+</html>
